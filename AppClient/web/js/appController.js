@@ -22,14 +22,17 @@ define(['ojs/ojcore', 'knockout', 'ojs/ojrouter', 'ojs/ojknockout', 'ojs/ojarray
        // Router setup
        self.router = oj.Router.rootInstance;
        self.router.configure({
-         'timezones': {label: 'Timezones', isDefault: true, canEnter: isLoggedIn()}
+         'timezones': {label: 'Timezones', isDefault: true, canEnter: isLoggedIn()},
+         'users': {label: 'Users'}
        });
       oj.Router.defaults['urlAdapter'] = new oj.Router.urlParamAdapter();
 
       // Navigation setup
       var navData = [
       {name: 'Timezones', id: 'timezones',
-       iconClass: 'oj-navigationlist-item-icon demo-icon-font-26 clockface-icon'}
+       iconClass: 'oj-navigationlist-item-icon demo-icon-font-26 clockface-icon'},
+      {name: 'Users', id: 'users',
+       iconClass: 'oj-navigationlist-item-icon demo-icon-font-24 demo-people-icon-24'}
       ];
       self.navDataSource = new oj.ArrayTableDataSource(navData, {idAttribute: 'id'});
 

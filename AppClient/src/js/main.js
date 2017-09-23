@@ -3,7 +3,9 @@
 requirejs.config(
 {
   baseUrl: 'js',
+
   paths:
+  //injector:mainReleasePaths
   {
     'knockout': 'libs/knockout/knockout-3.4.0.debug',
     'jquery': 'libs/jquery/jquery-3.1.1',
