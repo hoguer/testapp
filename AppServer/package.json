@@ -1,0 +1,18 @@
+{
+  "name": "ToptalApp_Server",
+  "version": "1.0.0",
+  "dependencies": {
+    "bcrypt": "^1.0.3",
+    "body-parser": "~1.18.1",
+    "connect-flash": "^0.1.1",
+    "cors": "^2.8.1",
+    "debug": "~3.0.1",
+    "express": "^4.15.4",
+    "express-session": "^1.15.5",
+    "jwt-simple": "^0.5.1",
+    "mysql": "^2.14.1",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
+    "jade": "~1.11.0"
+  }
+}
