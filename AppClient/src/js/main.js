@@ -42,6 +42,9 @@ require(['ojs/ojcore', 'knockout', 'appController', 'ojs/ojknockout',
     $(function() {
 
       function init() {
+        if (!document.cookie.match(/^(.*;)?connect\.sid=\s*[^;]+(.*)?$/)) {
+          window.location = "http://localhost:3000/login";
+        }
         oj.Router.sync().then(
           function () {
             ko.applyBindings(app, document.getElementById('globalBody'));

@@ -3,16 +3,6 @@ define(['ojs/ojcore', 'knockout', 'ojs/ojrouter', 'ojs/ojknockout', 'ojs/ojarray
   function(oj, ko) {
      function ControllerViewModel() {
 
-      function isLoggedIn(){
-        $.getJSON( "http://localhost:3000/isLoggedIn", function( data ) {
-          return (data === 'true');
-          console.log(data);
-          if(data){
-            console.log("data is true");
-          }
-        });
-      }
-
       // Media queries for repsonsive layouts
       var smQuery = oj.ResponsiveUtils.getFrameworkQuery(oj.ResponsiveUtils.FRAMEWORK_QUERY_KEY.SM_ONLY);
       self.smScreen = oj.ResponsiveKnockoutUtils.createMediaQueryObservable(smQuery);
@@ -22,7 +12,7 @@ define(['ojs/ojcore', 'knockout', 'ojs/ojrouter', 'ojs/ojknockout', 'ojs/ojarray
        // Router setup
        self.router = oj.Router.rootInstance;
        self.router.configure({
-         'timezones': {label: 'Timezones', isDefault: true, canEnter: isLoggedIn()},
+         'timezones': {label: 'Timezones', isDefault: true},
          'users': {label: 'Users'}
        });
       oj.Router.defaults['urlAdapter'] = new oj.Router.urlParamAdapter();

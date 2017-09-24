@@ -1,8 +1,9 @@
 var express = require('express');
+var path = require('path');
 var bodyParser = require('body-parser');
 var cors = require('cors');
-var Timezones=require('./routes/Timezones');
 var app = express();
+app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'jade');
 // Using the flash middleware provided by connect-flash to store messages in session
 // and displaying in templates
@@ -11,13 +12,20 @@ app.use(flash());
 // Configuring Passport
 var passport = require('passport');
 var index=require('./routes/index')(passport);
+var Timezones=require('./routes/Timezones');
 var expressSession = require('express-session');
 app.use(expressSession({secret: '!Toptal_rocks!',
 												resave: false,
-  											saveUninitialized: true}));
+  											saveUninitialized: true,
+                        cookie: {httpOnly: false}}));
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(cors());
+app.use(cors({
+  origin: function (origin, callback) {
+    callback(null, origin);
+  },
+  credentials: true
+}));
 app.use(bodyParser.urlencoded({
   extended: true
 }));

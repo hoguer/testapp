@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-var cors = require('cors');
 var Timezone=require('../models/Timezone');
 
 var isAuthenticated = function (req, res, next) {
@@ -10,14 +9,11 @@ var isAuthenticated = function (req, res, next) {
 	if (req.isAuthenticated())
 		return next();
 	// if the user is not authenticated then redirect him to the login page
-	res.json("NOT_LOGGED_IN");
+	res.send("NOT_LOGGED_IN");
 }
 
 //CREATE
-router.post('/', function(req,res,next){
-	console.log("in post");
-	console.log(req.headers);
-	console.log(req.body);
+router.post('/', isAuthenticated, function(req,res,next){
 	Timezone.addTimezone(req.body,function(err,result){
 		if(err) {
 			res.json(err);
@@ -31,7 +27,7 @@ router.post('/', function(req,res,next){
 });
 
 //READ
-router.get('/:id?', function(req,res,next){
+router.get('/:id?', isAuthenticated, function(req,res,next){
 	if(req.params.id){
 		Timezone.getTimezoneById(req.params.id,function(err,rows){
 			if(err) {
@@ -52,7 +48,7 @@ router.get('/:id?', function(req,res,next){
 });
 
 //UPDATE
-router.put('/:id',function(req,res,next){
+router.put('/:id',isAuthenticated, function(req,res,next){
   Timezone.updateTimezone(req.params.id,req.body,function(err,rows){
 		if(err) {
 			res.json(err);
@@ -63,7 +59,7 @@ router.put('/:id',function(req,res,next){
 });
 
 //DELETE
-router.delete('/:id',function(req,res,next){
+router.delete('/:id', isAuthenticated, function(req,res,next){
 	Timezone.deleteTimezone(req.params.id,function(err,count){
 		if(err) {
 			res.json(err);

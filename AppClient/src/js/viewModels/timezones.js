@@ -145,7 +145,9 @@ define(['ojs/ojcore',
                    urlRoot: self.serviceURL,
                    parse: parseTimezone,
                    parseSave: parseSaveTimezone,
-                   idAttribute: 'TimezoneId'
+                   idAttribute: 'TimezoneId',
+                   customURL: {'credentials':'include'},
+
       });
 
       var newTimezone = new Timezone();
@@ -154,7 +156,8 @@ define(['ojs/ojcore',
       var TimezoneCollection = oj.Collection.extend({
         url: self.serviceURL,
         model: newTimezone,
-        comparator: "TimezoneId"
+        comparator: "TimezoneId",
+        customURL: {'credentials':'include'}
       });
 
       self.TimezoneCol(new TimezoneCollection());
@@ -163,6 +166,18 @@ define(['ojs/ojcore',
       self.handleActivated = function(info) {
         // Implement if needed
       };
+
+      function reqListener () {
+        if (this.responseText == "NOT_LOGGED_IN") {
+          window.location = "http://localhost:3000/login";
+        }
+      }
+
+      var xhr = new XMLHttpRequest();
+      xhr.addEventListener("load", reqListener);
+      xhr.open('GET', 'http://localhost:3000/Timezones');
+      xhr.withCredentials = true;
+      xhr.send();
 
     }
 

@@ -12,11 +12,12 @@ var isAuthenticated = function (req, res, next) {
 }
 
 module.exports = function(passport){
+
   /* Handle Login POST */
   router.post('/login', passport.authenticate('login', {
     successRedirect: 'http://localhost:8000/',
     failureRedirect: '/login',
-    failureFlash : true 
+    failureFlash : true
   }));
  
   /* Handle Registration POST */
@@ -26,18 +27,14 @@ module.exports = function(passport){
     failureFlash : true 
   }));
 
-  	/* Handle Logout */
+  /* Handle Logout */
 	router.get('/signout', function(req, res) {
 		req.logout();
-		res.redirect('/');
-	});
-
-	router.get('/isLoggedIn', function(req, res) {
-		if (req.user && req.user.username) {
-			res.json("true");
-		} else {
-			res.json("false");
-		}
+    req.session.destroy(function (err) {
+      res.clearCookie('connect.sid');
+      res.cookie("connect.sid", "", { expires: new Date() });
+      res.redirect('/login');
+    });
 	});
 
 	/* GET login page. */
