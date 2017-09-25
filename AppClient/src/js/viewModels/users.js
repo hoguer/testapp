@@ -1,7 +1,7 @@
-
 define(['ojs/ojcore', 
         'knockout', 
         'jquery', 
+        '../utilities/APIUtility',
         'ojs/ojknockout', 
         'promise', 
         'ojs/ojtable', 
@@ -11,46 +11,26 @@ define(['ojs/ojcore',
         'ojs/ojinputnumber',
         'ojs/ojselectcombobox',
         'ojs/ojcollectiontabledatasource'],
- function(oj, ko, $) {
+ function(oj, ko, $, APIUtility) {
   
     function UsersViewModel() {
       var self = this;
-      self.serviceURL = 'http://localhost:3000/Users';
+      self.emailPattern = '[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}$';
       self.Users = ko.observableArray([]);
-      self.UserCol = ko.observable();
       self.datasource = ko.observable();
       self.somethingChecked = ko.observable(false);
-      self.currentUserName = ko.observable('default');
+      self.currentUser = ko.observable({'username': '', 'first_name': '', 'last_name': '', 'email' : '', 'role_id' : 2});
       self.workingId = ko.observable('');
-                
-      self.fetch = function (successCallBack) {
-        // populate the collection by calling fetch()
-        self.UserCol().fetch({
-          success: successCallBack, 
-          error: function (jqXHR, textStatus, errorThrown) {
-            console.log('Error in fetch: ' + textStatus);
-          }
-        });
-      };
 
-      parseUser = function(response) {
-        return {UserId: response['id'],
-                UserName: response['username'],
-                FirstName: response['first_name'],
-                Lastname: response['last_name'],
-                RoleId: response['role_id'],
-                Email: response['email']
-              };
-      }
-
-      function parseSaveUser(response) {
-        return {id: response['id'], 
-                username: response['username'], 
-                first_name: response['first_name'],
-                last_name: response['last_name'],
-                role_id: response['role_id'],
-                email: response['email']
-              };
+      function getRoleId(role_name) {
+        switch(role_name) {
+          case "admin":
+              return '1';
+          case "manager":
+              return '3';
+          default: //user
+              return '2';
+        }
       }
 
       self.findUserIds = function() {
@@ -58,7 +38,7 @@ define(['ojs/ojcore',
         $("input:checkbox").each(function() {
               var cb = $(this);
               if (cb.is(":checked")) {
-                  selectedIdsArray.push(cb.attr("id"));
+                  selectedIdsArray.push(parseInt(cb.attr("id")));
               }
           });
           return selectedIdsArray;
@@ -66,7 +46,6 @@ define(['ojs/ojcore',
 
       // Deletion handlers/helpers
         self.enableDelete = function() {
-          console.log("in enable delete");
             if (!$('input[type=checkbox]:checked').length) {
                 self.somethingChecked(false);
             } else {
@@ -76,97 +55,74 @@ define(['ojs/ojcore',
         }
 
         self.deleteUser = function(data, event) {
-            var userIds = [];
-            userIds = self.findUserIds();
-            var collection = data.UserCol();
-            userIds.forEach(function(value, index, arr) {
-                var model = collection.get(parseInt(value));
-                if (model) {
-                    collection.remove(model);
-                    model.destroy();
-                }
+            var userIds = self.findUserIds();
+            var xhr = APIUtility.createXHR(null,"Users/" + JSON.stringify(userIds),"DELETE");
+            var newUsers = self.Users().filter(function( obj ) {
+              return !userIds.includes(obj.id);
             });
+            self.Users(newUsers);
             self.enableDelete();
             $('#demoTable').ojTable('refresh');
         }
 
         // Update handlers/helpers
-        self.showChangeNameDialog = function(userId, data, event) {
-            var currName = data.UserName;
+        self.showChangeUserDialog = function(userId, data, event) {
             self.workingId(userId);
-            self.currentUserName(currName);
+            data.role_id = getRoleId(data.role_name);
+            $('#editRole').val(data.role_id);
+            self.currentUser(data);
             $('#editDialog').ojDialog('open');
         }
 
-        self.updateUserName = function(formData, event) {
-            var currentId = self.workingId();
-            var newName = formData.elements[0].value;
-            if (newName != self.currentUserName() && newName != '') {
-                var myCollection = self.UserCol();
-                var myModel = myCollection.get(currentId);
-                myModel.save({'UserName': newName}, {
-                    success: function(myModel, response, options) {
-                        $('#editDialog').ojDialog('close');
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        alert("Update failed with: " + textStatus);
-                        $('#editDialog').ojDialog('close');
-                    }
-                });
-            } else {
-                alert('User Name is not different or the new name is not valid');
-                $('#editDialog').ojDialog('close');
-            }
-        };
+      function updateUserReqListener () {
+        APIUtility.authRedirectIfNotLoggedIn(this.responseText);
+        let response = JSON.parse(this.responseText);
+        for (var tz in self.Users()) {
+          if (self.Users()[tz].id == response.id) {
+            self.Users.replace(self.Users()[tz], response);
+            break; 
+          }
+        }
+        $('#editDialog').ojDialog('close');
+      }
 
-        // Create handler
-        self.addUser = function (formElement, event) {
-            var gmtOffset_hours = $("#newTimezoneGMTOffset_hours").val();
-            if ((gmtOffset_hours < 10) && (gmtOffset_hours > -10) ) {
-              if (gmtOffset_hours >= 0) {
-                var gmtOffset_hours = '0' + gmtOffset_hours;
-              } else {
-                var gmtOffset_hours = '-' + '0' + Math.abs(gmtOffset_hours);
-              }
-            }
-             
-            var gmtOffset =  gmtOffset_hours + ':' + $("#newTimezoneGMTOffset_mins").val() + ':00';
-            var recordAttrs = {name: $("#newTimezoneName").val(),
-                               city: $("#newTimezoneCity").val(),
-                               gmt_offset: gmtOffset,
-                               };
-            this.UserCol().create(recordAttrs, {wait:true,
-                'contentType': 'application/json',
-                success: function (response) {
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    console.log('Error in Create: ' + textStatus);
-                }
-            });
-        };
+      self.updateUser = function(formData, event) {
+          var currentId = self.workingId();
+          var recordAttrs = {username: $("#editUserName").val(),
+                             first_name: $("#editFirstName").val(),
+                             last_name: $("#editLastName").val(),
+                             email: $("#editEmail").val(),
+                             role_id: $("#editRole").val()
+                            };
+          var xhr = APIUtility.createXHR(updateUserReqListener,"Users/" + currentId, "PUT", recordAttrs);
 
-      var User = oj.Model.extend({
-                   urlRoot: self.serviceURL,
-                   parse: parseUser,
-                   parseSave: parseSaveUser,
-                   idAttribute: 'UserId'
-      });
-
-      var newUser = new User();
-
-      // this defines our collection and what models it will hold
-      var UserCollection = oj.Collection.extend({
-        url: self.serviceURL,
-        model: newUser,
-        comparator: "UserId"
-      });
-
-      self.UserCol(new UserCollection());
-      self.datasource(new oj.CollectionTableDataSource(self.UserCol()));
-
-      self.handleActivated = function(info) {
-        // Implement if needed
       };
+
+      function addUserReqListener () {
+        APIUtility.authRedirectIfNotLoggedIn(this.responseText);
+        console.log(this.responseText);
+        self.Users.push(JSON.parse(this.responseText));
+      }
+
+      // Create handler
+      self.addUser = function (formElement, event) {
+          var recordAttrs = {username: $("#newUserName").val(),
+                             first_name: $("#newUserFirstName").val(),
+                             last_name: $("#newUserLastName").val(),
+                             email: $("#newUserEmail").val(),
+                             role_id: $("#newUserRole").val(),
+                             password: $("#newUserPassword").val()
+                             };
+          var xhr = APIUtility.createXHR(addUserReqListener,"Users","POST",recordAttrs);
+      };
+
+      self.datasource= new oj.ArrayTableDataSource(self.Users, {idAttribute: "id"});
+
+      function getUsersReqListener () {
+        APIUtility.authRedirectIfNotLoggedIn(this.responseText);
+        self.Users(JSON.parse(this.responseText));
+      }
+      var xhr = APIUtility.createXHR(getUsersReqListener,"Users","GET");
 
     }
 

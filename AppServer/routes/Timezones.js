@@ -12,6 +12,17 @@ var isAuthenticated = function (req, res, next) {
 	res.send("NOT_LOGGED_IN");
 }
 
+function getRoleName(role_id) {
+	switch(role_id) {
+    case 1:
+        return 'admin';
+    case 3:
+        return 'manager';
+    default:
+        return 'user';
+	}
+}
+
 //CREATE
 router.post('/', isAuthenticated, function(req,res,next){
 	Timezone.addTimezone(req.user[0], req.body,function(err,result){
@@ -19,6 +30,7 @@ router.post('/', isAuthenticated, function(req,res,next){
 			res.json(err);
 		} else {
 			if (result) {
+				req.body.role_name = getRoleName(result.role_id);
 				req.body.id = result.insertId;
 			}
       res.json(req.body); 

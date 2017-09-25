@@ -7,10 +7,13 @@ define(function () {
         window.location = serviceURL + "login";
       }
     },
-    createXHR: function(eventListener, path, crudOP, data) {
+    createXHR: function(eventListener, path, crudOP, data, async) {
+      if (typeof async === 'undefined') {
+        async = true;
+      }
       var xhr = new XMLHttpRequest();
       xhr.addEventListener("load", eventListener);
-      xhr.open(crudOP, serviceURL + path);
+      xhr.open(crudOP, serviceURL + path, async);
       if ((crudOP === "POST")||(crudOP === "PUT")) {
         xhr.setRequestHeader("Content-type", "application/json");
       }
