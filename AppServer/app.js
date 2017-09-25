@@ -13,6 +13,7 @@ app.use(flash());
 var passport = require('passport');
 var index=require('./routes/index')(passport);
 var Timezones=require('./routes/Timezones');
+var Users=require('./routes/Users');
 var expressSession = require('express-session');
 app.use(expressSession({secret: '!Toptal_rocks!',
 												resave: false,
@@ -34,6 +35,7 @@ app.use(bodyParser.json());
 app.options('*', cors());
 
 app.use('/Timezones',Timezones);
+app.use('/Users',Users);
 app.use('/', index);
 
 // Initialize Passport

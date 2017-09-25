@@ -14,7 +14,7 @@ var isAuthenticated = function (req, res, next) {
 
 //CREATE
 router.post('/', isAuthenticated, function(req,res,next){
-	Timezone.addTimezone(req.body,function(err,result){
+	Timezone.addTimezone(req.user[0], req.body,function(err,result){
 		if(err) {
 			res.json(err);
 		} else {
@@ -29,7 +29,7 @@ router.post('/', isAuthenticated, function(req,res,next){
 //READ
 router.get('/:id?', isAuthenticated, function(req,res,next){
 	if(req.params.id){
-		Timezone.getTimezoneById(req.params.id,function(err,rows){
+		Timezone.getTimezoneById(req.user[0], req.params.id,function(err,rows){
 			if(err) {
 				res.json(err);
 			} else {
@@ -37,7 +37,7 @@ router.get('/:id?', isAuthenticated, function(req,res,next){
 			}
 		});
 	} else {
-		Timezone.getAllTimezones(function(err,rows){
+		Timezone.getAllTimezones(req.user[0], function(err,rows){
 			if(err) {
 				res.json(err);
 			} else {
@@ -49,7 +49,7 @@ router.get('/:id?', isAuthenticated, function(req,res,next){
 
 //UPDATE
 router.put('/:id',isAuthenticated, function(req,res,next){
-  Timezone.updateTimezone(req.params.id,req.body,function(err,rows){
+  Timezone.updateTimezone(req.user[0], req.params.id,req.body,function(err,rows){
 		if(err) {
 			res.json(err);
 		} else {
@@ -60,7 +60,8 @@ router.put('/:id',isAuthenticated, function(req,res,next){
 
 //DELETE
 router.delete('/:id', isAuthenticated, function(req,res,next){
-	Timezone.deleteTimezone(req.params.id,function(err,count){
+	console.log(req.params.id);
+	Timezone.deleteTimezone(req.user[0], req.params.id,function(err,count){
 		if(err) {
 			res.json(err);
 		} else {

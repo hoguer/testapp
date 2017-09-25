@@ -1393,3 +1393,6 @@ a.categorylink:hover {
     background-image: none;
     margin: 5px
 }
+.oj-md-odd-cols-6 .oj-flex .oj-flex-item.new_label {
+    max-width:20%;
+}

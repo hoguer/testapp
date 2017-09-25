@@ -5,7 +5,8 @@ requirejs.config(
   baseUrl: 'js',
 
   paths:
-  //injector:mainReleasePaths
+//injector:mainReleasePaths
+
   {
     'knockout': 'libs/knockout/knockout-3.4.0.debug',
     'jquery': 'libs/jquery/jquery-3.1.1',
@@ -22,7 +23,8 @@ requirejs.config(
     'proj4': 'libs/proj4js/dist/proj4-src',
     'css': 'libs/require-css/css',
   }
-  //endinjector
+  
+//endinjector
   ,
   // Shim configurations for modules that do not expose AMD
   shim:

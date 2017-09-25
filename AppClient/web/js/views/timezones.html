@@ -1,40 +1,96 @@
-  <div class="oj-flex oj-flex-items-pad">
+<div class="oj-flex oj-flex-items-pad">
     <div id="mainContent" class="oj-flex-item oj-sm-12 oj-md-12 demo-page-content-area page-padding" >
-      <div class="page-padding">
-        <div id="timezoneList" class="oj-flex-item oj-md-9 oj-sm-12">
-          <table id="table" 
-                 data-bind="ojComponent: {component: 'ojTable', 
-                                          data: datasource, 
-                                          columns: [{headerText: 'Remove', id: 'column1', sortable: 'disabled'},
-                                                    {headerText: 'Timezone ID', 
-                                                     field: 'TimezoneId', sortable: 'enabled'},
-                                                    {headerText: 'Timezone Name', 
-                                                     field: 'TimezoneName', sortable: 'enabled'},
-                                                    {headerText: 'City', 
-                                                     field: 'City'},
-                                                    {headerText: 'GMT Offset', 
-                                                     field: 'GMTOffset'}],
-                                          selectionMode: {row: 'none', column:'none'},
-                                          rowTemplate: 'row_tmpl'}">
-          </table>
-          <br/>
-          (Click on a Timezone Name to edit it)
-          <br/><br/>
-          <button id="deleteTimezone_btn" data-bind="enable: somethingChecked, click: deleteTimezone">Remove Timezone</button>
-          <br/>
-          <div id="editDialog" title="Change Timezone Name" data-bind="ojComponent:{component: 'ojDialog', initialVisibility: 'hide', resizeBehavior: 'none', dragAffordance: 'title-bar', modality: 'modeless'}">
-            <form class="oj-form oj-sm-odd-cols-12" data-bind="submit: updateTimezoneName">
+      <div class="oj-flex oj-sm-flex-items-initial demo-center-panels">
 
-              <div class="oj-dialog-header oj-helper-clearfix" aria-labelledby="dialog-title-id">
-                <div>
-                  <span id="infoIcon" class="oj-message-status-icon oj-message-info-icon" style="float:left; margin-right: 10px"></span>
-                  <span id="dialog-title-id" class="oj-dialog-title">Change Timezone Name</span>                                    
+          <div class="oj-panel demo-mypanel oj-flex-item" style="width:60%">
+            <div id="timezoneList" class="oj-flex-item oj-md-9 oj-sm-12">
+            <h3>Timezones</h3><hr/>
+              <table id="table" 
+                     data-bind="ojComponent: {component: 'ojTable', 
+                                              data: datasource, 
+                                              columns: [{headerText: 'Remove', id: 'column1', sortable: 'disabled'},
+                                                        {headerText: 'ID', 
+                                                         field: 'id', sortable: 'enabled'},
+                                                        {headerText: 'Name', 
+                                                         field: 'name', sortable: 'enabled'},
+                                                        {headerText: 'City', 
+                                                         field: 'city'},
+                                                        {headerText: 'GMT Offset', 
+                                                         field: 'gmt_offset'}],
+                                              selectionMode: {row: 'none', column:'none'},
+                                              rowTemplate: 'row_tmpl'}">
+              </table>
+              <br/>
+              (Click on a Timezone Name to edit it)
+              <br/><br/>
+              <button id="deleteTimezone_btn" data-bind="enable: somethingChecked, click: deleteTimezone">Remove Timezone(s)</button>
+            </div>
+          </div>
+
+          <div id="addTimezone" class="oj-panel demo-mypanel oj-flex-item" style="width:40%">
+            <!-- A simple form is used to add a new Timezone record. -->
+            <div id="newTimezoneForm">
+              <form class="oj-form oj-md-odd-cols-6 oj-md-labels-inline" data-bind="submit: addTimezone">
+                <h3>New Timezone</h3><hr/>
+                <div class="oj-flex">  
+                  <div class="oj-flex-item new_label">
+                    <label for="newTimezoneName" class="oj-label">Name</label>
+                  </div>
+                  <div class="oj-flex-item">
+                    <input id="newTimezoneName" maxlength='30' placeholder="name" data-bind="ojComponent:{component:'ojInputText'}"/>
+                  </div>
                 </div>
-              </div>
+                <div class="oj-flex ">  
+                  <div class="oj-flex-item new_label">
+                    <label for="newTimezoneCity" class="oj-label">City</label>
+                  </div>
+                  <div class="oj-flex-item">
+                    <input id="newTimezoneCity" maxlength='30' placeholder="city" data-bind="ojComponent:{component:'ojInputText'}"/>
+                  </div>
+                </div>  
+                <div class="oj-flex">  
+                  <div class="oj-flex-item new_label">
+                    <label for="newTimezoneCity" class="oj-label">GMT Offset</label>
+                  </div>
+                  <div class="oj-flex-item">
+                    <input id="newTimezoneGMTOffset_hours" maxlength='30' value="0" 
+                    data-bind="ojComponent:{component:'ojInputNumber',
+                                            max:14,
+                                            min:-12}"/>
+                    <input id="newTimezoneGMTOffset_mins" list="increments" maxlength='30' value="00" 
+                    data-bind="ojComponent:{component:'ojCombobox'}"/>
+                    <datalist id="increments">
+                      <option value="00">00</option>
+                      <option value="30">30</option>
+                    </datalist>
+                  </div>
+                </div>  
+                <button id="saveBtn" class="oj-button" type="submit" data-bind="ojComponent:{component:'ojButton', label: 'Add Timezone'}"></button>                                      
+              </form>
+            </div>
+          </div>
+
+          <br/>
+          <div id="editDialog" title="Change Timezone" data-bind="ojComponent:{component: 'ojDialog', initialVisibility: 'hide', resizeBehavior: 'none', dragAffordance: 'title-bar', modality: 'modeless'}">
+            <form class="oj-form oj-sm-odd-cols-12" data-bind="submit: updateTimezone">
+
               <div class="oj-dialog-body">
                 <div class="oj-md-odd-cols-4">
-                  <label for="newName" class="oj-label oj-label-inline">Timezone Name</label>
-                  <input id="newName" type="text" data-bind="ojComponent: {component:'ojInputText', value: currentTimezoneName()}">
+                  <label for="newName" class="oj-label oj-label-inline">Name</label>
+                  <input id="newName" type="text" data-bind="ojComponent: {component:'ojInputText'}">
+                  <label for="newCity" class="oj-label oj-label-inline">City</label>
+                  <input id="newCity" type="text" data-bind="ojComponent: {component:'ojInputText'}">
+                  <label for="newOffset_hours" class="oj-label oj-label-inline">GMT Offset</label>
+                  <input id="newOffset_hours" maxlength='30' value="0" 
+                    data-bind="ojComponent:{component:'ojInputNumber',
+                                            max:14,
+                                            min:-12}"/>
+                    <input id="newOffset_mins" list="increments" maxlength='30' value="00" 
+                    data-bind="ojComponent:{component:'ojCombobox'}"/>
+                    <datalist id="increments">
+                      <option value="00">00</option>
+                      <option value="30">30</option>
+                    </datalist>
                 </div>
               </div>
               <div class="oj-dialog-footer">
@@ -45,53 +101,6 @@
           </div>
           <br/>
 
-          <!-- A simple form is used to add a new Timezone record. -->
-          <div id="addTimezone" class="oj-flex-item oj-md-3 oj-sm-12 right">
-            <div id="quickUpdate" class="frame">
-              <div id="newTimezoneForm">
-                <form class="oj-form oj-sm-odd-cols-12 oj-md-odd-cols-6 oj-md-labels-inline" data-bind="submit: addTimezone">
-                  <h3>New Timezone</h3><hr/>
-                  <div class="oj-flex">  
-                    <div class="oj-flex-item">
-                      <label for="newTimezoneName" class="oj-label">Name</label>
-                    </div>
-                    <div class="oj-flex-item">
-                      <input id="newTimezoneName" maxlength='30' placeholder="name" data-bind="ojComponent:{component:'ojInputText'}"/>
-                    </div>
-                  </div>
-                  <div class="oj-flex">  
-                    <div class="oj-flex-item">
-                      <label for="newTimezoneCity" class="oj-label">City</label>
-                    </div>
-                    <div class="oj-flex-item">
-                      <input id="newTimezoneCity" maxlength='30' placeholder="city" data-bind="ojComponent:{component:'ojInputText'}"/>
-                    </div>
-                  </div>  
-                  <div class="oj-flex">  
-                    <div class="oj-flex-item">
-                      <label for="newTimezoneCity" class="oj-label">GMT Offset</label>
-                    </div>
-                    <div class="oj-flex-item">
-                      <input id="newTimezoneGMTOffset_hours" maxlength='30' value="0" 
-                      data-bind="ojComponent:{component:'ojInputNumber',
-                                              max:14,
-                                              min:-12}"/>
-                      <input id="newTimezoneGMTOffset_mins" list="increments" maxlength='30' value="00" 
-                      data-bind="ojComponent:{component:'ojCombobox'}"/>
-                      <datalist id="increments">
-                        <option value="00">00</option>
-                        <option value="30">30</option>
-                      </datalist>
-                    </div>
-                  </div>  
-                      <button id="saveBtn" class="oj-button" type="submit" data-bind="ojComponent:{component:'ojButton', label: 'Add Timezone'}"></button>
-                    </div>
-                  </div>                                        
-                </form>
-              </div>
-            </div>
-          </div> 
-
         </div>
       </div>
     </div>
@@ -99,10 +108,10 @@
 
 <script type="text/html" id="row_tmpl">    
     <tr>
-        <td><input type="checkbox" data-bind="attr: {id: TimezoneId}, click: $parent.enableDelete"/></td>
-        <td><div id="timezoneId" data-bind="text: TimezoneId"></div></td>
-        <td><div id="timezoneName" data-bind="text: TimezoneName, click: function(data, event){$parent.showChangeNameDialog(TimezoneId,data,event)}"></div></td>
-        <td><div id="locId" data-bind="text: City"></div></td>
-        <td><div id="mgrId" data-bind="text: GMTOffset"></div></td>
+        <td><input type="checkbox" data-bind="attr: {id: id}, click: $parent.enableDelete"/></td>
+        <td><div id="timezoneId" data-bind="text: id"></div></td>
+        <td><div id="timezoneName" data-bind="text: name, click: function(data, event){$parent.showChangeNameDialog(id,data,event)}"></div></td>
+        <td><div id="locId" data-bind="text: city"></div></td>
+        <td><div id="mgrId" data-bind="text: gmt_offset"></div></td>
     </tr>
 </script>           

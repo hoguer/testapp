@@ -1,6 +1,6 @@
-define(['ojs/ojcore', 'knockout', 'ojs/ojrouter', 'ojs/ojknockout', 'ojs/ojarraytabledatasource',
+define(['ojs/ojcore', 'knockout', './utilities/APIUtility', 'ojs/ojrouter', 'ojs/ojknockout', 'ojs/ojarraytabledatasource',
   'ojs/ojoffcanvas'],
-  function(oj, ko) {
+  function(oj, ko, APIUtility) {
      function ControllerViewModel() {
 
       // Media queries for repsonsive layouts
@@ -42,10 +42,13 @@ define(['ojs/ojcore', 'knockout', 'ojs/ojrouter', 'ojs/ojknockout', 'ojs/ojarray
       $("#navDrawer").on("ojclose", function() { $('#drawerToggleButton').focus(); });
 
       // Header
-      // Application Name used in Branding Area
-      self.appName = ko.observable("");
       // User Info used in Global Navigation area
-      self.userLogin = ko.observable("rachel.smith@gmail.com");
+      function reqListener () {
+        APIUtility.authRedirectIfNotLoggedIn(this.responseText);
+        var user = JSON.parse(this.responseText);
+        self.userLogin = ko.observable(user.email);
+      }
+      var xhr = APIUtility.createXHR(reqListener,"Users/getCurrentUser","GET");
      }
 
      return new ControllerViewModel();
