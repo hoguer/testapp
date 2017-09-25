@@ -77,20 +77,17 @@
               <div class="oj-dialog-body">
                 <div class="oj-md-odd-cols-4">
                   <label for="newName" class="oj-label oj-label-inline">Name</label>
-                  <input id="newName" type="text" data-bind="ojComponent: {component:'ojInputText'}">
+                  <input id="newName" type="text" data-bind="ojComponent: {component:'ojInputText', value: currentTimezone().name}">
                   <label for="newCity" class="oj-label oj-label-inline">City</label>
-                  <input id="newCity" type="text" data-bind="ojComponent: {component:'ojInputText'}">
+                  <input id="newCity" type="text" data-bind="ojComponent: {component:'ojInputText', value: currentTimezone().city}">
                   <label for="newOffset_hours" class="oj-label oj-label-inline">GMT Offset</label>
                   <input id="newOffset_hours" maxlength='30' value="0" 
                     data-bind="ojComponent:{component:'ojInputNumber',
+                                            value:currentTimezone().gmt_offset_hours,
                                             max:14,
                                             min:-12}"/>
-                    <input id="newOffset_mins" list="increments" maxlength='30' value="00" 
-                    data-bind="ojComponent:{component:'ojCombobox'}"/>
-                    <datalist id="increments">
-                      <option value="00">00</option>
-                      <option value="30">30</option>
-                    </datalist>
+                    <input id="newOffset_mins" list="increments" maxlength='30' 
+                    data-bind="ojComponent:{component:'ojCombobox', value:currentTimezone().gmt_offset_mins}"/>
                 </div>
               </div>
               <div class="oj-dialog-footer">
@@ -110,7 +107,7 @@
     <tr>
         <td><input type="checkbox" data-bind="attr: {id: id}, click: $parent.enableDelete"/></td>
         <td><div id="timezoneId" data-bind="text: id"></div></td>
-        <td><div id="timezoneName" data-bind="text: name, click: function(data, event){$parent.showChangeNameDialog(id,data,event)}"></div></td>
+        <td><div id="timezoneName" data-bind="text: name, click: function(data, event){$parent.showChangeTimezoneDialog(id,data,event)}"></div></td>
         <td><div id="locId" data-bind="text: city"></div></td>
         <td><div id="mgrId" data-bind="text: gmt_offset"></div></td>
     </tr>

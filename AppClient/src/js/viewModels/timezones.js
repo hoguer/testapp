@@ -16,10 +16,9 @@ define(['ojs/ojcore',
     function TimezonesViewModel() {
       var self = this;
       self.Timezones = ko.observableArray([]);
-      self.TimezoneCol = ko.observable();
       self.datasource = ko.observable();
       self.somethingChecked = ko.observable(false);
-      self.currentTimezoneName = ko.observable('default');
+      self.currentTimezone = ko.observable({'name': '', 'city': '', 'gmt_offset_hours': 0, 'gmt_offset_mins' : ''});
       self.workingId = ko.observable('');
 
       function convertGMTOffset(hourViewId, minuteViewId) {
@@ -34,12 +33,20 @@ define(['ojs/ojcore',
           return  gmtOffset_hours + ':' + $("#" + minuteViewId).val() + ':00';
       }
 
+      function getHoursFromGMTOffset(gmt_offset) {
+        let hour_string = gmt_offset.split(":")[0];
+        return parseInt(hour_string);
+      }
+      function getMinutesFromGMTOffset(gmt_offset) {
+        return gmt_offset.split(":")[1];
+      }
+
       self.findTimezoneIds = function() {
         var selectedIdsArray = [];
         $("input:checkbox").each(function() {
               var cb = $(this);
               if (cb.is(":checked")) {
-                  selectedIdsArray.push(cb.attr("id"));
+                  selectedIdsArray.push(parseInt(cb.attr("id")));
               }
           });
           return selectedIdsArray;
@@ -56,38 +63,51 @@ define(['ojs/ojcore',
         }
 
         self.deleteTimezone = function(data, event) {
-            var timezoneIds = [];
-            timezoneIds = self.findTimezoneIds();
-            timezoneIds.forEach(function(value, index, arr) {
-                var model = collection.get(parseInt(value));
+            var timezoneIds = self.findTimezoneIds();
+            var xhr = APIUtility.createXHR(null,"Timezones/" + JSON.stringify(timezoneIds),"DELETE");
+            var newTimezones = self.Timezones().filter(function( obj ) {
+              return !timezoneIds.includes(obj.id);
             });
+            self.Timezones(newTimezones);
             self.enableDelete();
             $('#demoTable').ojTable('refresh');
         }
 
         // Update handlers/helpers
-        self.showChangeNameDialog = function(timezoneId, data, event) {
-            var currName = data.TimezoneName;
+        self.showChangeTimezoneDialog = function(timezoneId, data, event) {
             self.workingId(timezoneId);
-            self.currentTimezoneName(currName);
+            data.gmt_offset_hours = getHoursFromGMTOffset(data.gmt_offset);
+            data.gmt_offset_mins = getMinutesFromGMTOffset(data.gmt_offset);
+            self.currentTimezone(data);
+            $('#newOffset_mins').val(data.gmt_offset_mins);
             $('#editDialog').ojDialog('open');
         }
 
+      function updateTimezoneReqListener () {
+        APIUtility.authRedirectIfNotLoggedIn(this.responseText);
+        let response = JSON.parse(this.responseText);
+        for (var tz in self.Timezones()) {
+          if (self.Timezones()[tz].id == response.id) {
+            self.Timezones.replace(self.Timezones()[tz], response);
+            break; 
+          }
+        }
+        $('#editDialog').ojDialog('close');
+      }
+
       self.updateTimezone = function(formData, event) {
           var currentId = self.workingId();
-          var newName = formData.elements[0].value;
-          if (newName != self.currentTimezoneName() && newName != '') {
-              var myCollection = self.TimezoneCol();
-              var myModel = myCollection.get(currentId);
-          } else {
-              alert('Timezone Name is not different or the new name is not valid');
-              $('#editDialog').ojDialog('close');
-          }
+          var gmtOffset =  convertGMTOffset("newOffset_hours","newOffset_mins");
+          var recordAttrs = {name: $("#newName").val(),
+                             city: $("#newCity").val(),
+                             gmt_offset: gmtOffset
+                            };
+          var xhr = APIUtility.createXHR(updateTimezoneReqListener,"Timezones/" + currentId, "PUT", recordAttrs);
+
       };
 
       function addTimezoneReqListener () {
         APIUtility.authRedirectIfNotLoggedIn(this.responseText);
-        console.log(JSON.parse(this.responseText));
         self.Timezones.push(JSON.parse(this.responseText));
       }
 
@@ -96,17 +116,12 @@ define(['ojs/ojcore',
           var gmtOffset =  convertGMTOffset("newTimezoneGMTOffset_hours","newTimezoneGMTOffset_mins");
           var recordAttrs = {name: $("#newTimezoneName").val(),
                              city: $("#newTimezoneCity").val(),
-                             gmt_offset: gmtOffset,
+                             gmt_offset: gmtOffset
                              };
           var xhr = APIUtility.createXHR(addTimezoneReqListener,"Timezones","POST",recordAttrs);
       };
 
       self.datasource= new oj.ArrayTableDataSource(self.Timezones, {idAttribute: "id"});
-
-
-      self.handleActivated = function(info) {
-        // Implement if needed
-      };
 
       function getTimezonesReqListener () {
         APIUtility.authRedirectIfNotLoggedIn(this.responseText);

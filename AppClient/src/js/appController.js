@@ -13,7 +13,7 @@ define(['ojs/ojcore', 'knockout', './utilities/APIUtility', 'ojs/ojrouter', 'ojs
        self.router = oj.Router.rootInstance;
        self.router.configure({
          'timezones': {label: 'Timezones', isDefault: true},
-         'users': {label: 'Users'}
+         'users': {label: 'Users'},
        });
       oj.Router.defaults['urlAdapter'] = new oj.Router.urlParamAdapter();
 
@@ -38,6 +38,17 @@ define(['ojs/ojcore', 'knockout', './utilities/APIUtility', 'ojs/ojrouter', 'ojs
       self.toggleDrawer = function() {
         return oj.OffcanvasUtils.toggle(self.drawerParams);
       }
+
+      // Dropdown menu states
+      self.menuItemSelect = function (event, ui) {
+        switch (ui.item.attr("id")) {
+          case "out":
+            window.location = APIUtility.serviceURL + "signout";
+            break;
+          default:
+        }
+      };
+
       // Add a close listener so we can move focus back to the toggle button when the drawer closes
       $("#navDrawer").on("ojclose", function() { $('#drawerToggleButton').focus(); });
 

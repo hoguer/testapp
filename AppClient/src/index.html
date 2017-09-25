@@ -54,8 +54,7 @@
                   icons: smScreen() ? {start: 'oj-icon demo-appheader-avatar', end: null} : {end: 'oj-component-icon oj-button-menu-dropdown-icon'},
                   chroming: 'half', menu: '#menu1'}">
                 </button>
-                <ul id='menu1' data-bind="ojComponent: {component: 'ojMenu'}" style="display:none">
-                  <li id="pref"><a href="#">Preferences</a></li>
+                <ul id='menu1' data-bind="ojComponent: {component: 'ojMenu', select: menuItemSelect}" style="display:none">
                   <li id="out"><a href="#">Sign Out</a></li>
                 </ul>
               </div>

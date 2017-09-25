@@ -49,19 +49,21 @@ router.get('/:id?', isAuthenticated, function(req,res,next){
 
 //UPDATE
 router.put('/:id',isAuthenticated, function(req,res,next){
-  Timezone.updateTimezone(req.user[0], req.params.id,req.body,function(err,rows){
+  Timezone.updateTimezone(req.user[0], req.params.id,req.body,function(err,result){
 		if(err) {
 			res.json(err);
 		} else {
-      res.json(rows);
+			if (result) {
+				req.body.id = req.params.id;
+			}
+      res.json(req.body);
     }
   });
 });
 
 //DELETE
-router.delete('/:id', isAuthenticated, function(req,res,next){
-	console.log(req.params.id);
-	Timezone.deleteTimezone(req.user[0], req.params.id,function(err,count){
+router.delete('/:ids', isAuthenticated, function(req,res,next){
+	Timezone.deleteTimezones(req.user[0], JSON.parse(req.params.ids),function(err,count){
 		if(err) {
 			res.json(err);
 		} else {
