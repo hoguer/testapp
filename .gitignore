@@ -1,4 +1,4 @@
 *.DS_Store
 AppServer/node_modules
 AppClient/node_modules
-AppClient/web/js/libs
+AppClient/web
