@@ -17,7 +17,6 @@ var Timezone={
     return db.query("DELETE FROM timezones WHERE id IN (?) " + owner_id_clause,[ids],callback);
 	},
 	updateTimezone:function(User,id,Timezone,callback){
-		console.log(Timezone);
 		let owner_id_clause = ((User.role_name === 'user')||(User.role_name === 'manager')) ? "and owner_id = " + User.id : "";
     return db.query("Update timezones set name=?,city=?,gmt_offset=? where id=? " + owner_id_clause,[Timezone.name,Timezone.city,Timezone.gmt_offset,id],callback);
 	}

@@ -15,11 +15,38 @@ define(['ojs/ojcore',
   
     function TimezonesViewModel() {
       var self = this;
-      self.Timezones = ko.observableArray([]);
+      self.Timezones = [];
       self.datasource = ko.observable();
       self.somethingChecked = ko.observable(false);
       self.currentTimezone = ko.observable({'name': '', 'city': '', 'gmt_offset_hours': 0, 'gmt_offset_mins' : ''});
       self.workingId = ko.observable('');
+
+      self.filter = new ko.observable('');
+      self.handleKeyUp = function()
+      {
+          var filter = self.filter().toString();
+          if (filter.length == 0)
+          {
+              self.clearClick();
+              return;
+          }
+          var timezoneArray = [];
+          var i, id;
+          for (i = self.Timezones.length - 1; i >= 0; i--) {
+            if (self.Timezones[i]['name'].toString().toLowerCase().indexOf(filter.toLowerCase()) >= 0) {
+              timezoneArray.push(self.Timezones[i]);
+            }
+          }
+          timezoneArray.reverse();
+          self.datasource().reset(timezoneArray);
+          $('#demoTable').ojTable('refresh');
+      };
+      self.clearClick = function(data, event){
+          self.filter('');
+          self.datasource().reset(self.Timezones);
+          self.highlightChars = [];
+          return true;
+      }
 
       function convertGMTOffset(hourViewId, minuteViewId) {
           var gmtOffset_hours = $("#" + hourViewId).val();
@@ -31,6 +58,17 @@ define(['ojs/ojcore',
             }
           }
           return  gmtOffset_hours + ':' + $("#" + minuteViewId).val() + ':00';
+      }
+
+      self.getDateGMTFormatFromGMTOffset = function(gmt_offset) {
+        var offset = getHoursFromGMTOffset(gmt_offset);
+        if (getMinutesFromGMTOffset(gmt_offset) === "30") {
+          offset += 0.5;
+        }
+        var d = new Date();
+        var utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+        var nd = new Date(utc + (3600000*offset));
+        return nd.toLocaleString().split(',')[1];
       }
 
       function getHoursFromGMTOffset(gmt_offset) {
@@ -65,10 +103,12 @@ define(['ojs/ojcore',
         self.deleteTimezone = function(data, event) {
             var timezoneIds = self.findTimezoneIds();
             var xhr = APIUtility.createXHR(null,"Timezones/" + JSON.stringify(timezoneIds),"DELETE");
-            var newTimezones = self.Timezones().filter(function( obj ) {
+            var newTimezones = self.Timezones.filter(function( obj ) {
               return !timezoneIds.includes(obj.id);
             });
-            self.Timezones(newTimezones);
+            self.Timezones = newTimezones;
+            self.datasource().reset(self.Timezones);
+            self.clearClick();
             self.enableDelete();
             $('#demoTable').ojTable('refresh');
         }
@@ -86,12 +126,14 @@ define(['ojs/ojcore',
       function updateTimezoneReqListener () {
         APIUtility.authRedirectIfNotLoggedIn(this.responseText);
         let response = JSON.parse(this.responseText);
-        for (var tz in self.Timezones()) {
-          if (self.Timezones()[tz].id == response.id) {
-            self.Timezones.replace(self.Timezones()[tz], response);
+        for (var tz in self.Timezones) {
+          if (self.Timezones[tz].id == response.id) {
+            self.Timezones[tz] = response;
             break; 
           }
         }
+        self.datasource().reset(self.Timezones);
+        self.clearClick();
         $('#editDialog').ojDialog('close');
       }
 
@@ -109,6 +151,8 @@ define(['ojs/ojcore',
       function addTimezoneReqListener () {
         APIUtility.authRedirectIfNotLoggedIn(this.responseText);
         self.Timezones.push(JSON.parse(this.responseText));
+        self.datasource().reset(self.Timezones);
+        $('#demoTable').ojTable('refresh');
       }
 
       // Create handler
@@ -121,11 +165,12 @@ define(['ojs/ojcore',
           var xhr = APIUtility.createXHR(addTimezoneReqListener,"Timezones","POST",recordAttrs);
       };
 
-      self.datasource= new oj.ArrayTableDataSource(self.Timezones, {idAttribute: "id"});
+      self.datasource = new ko.observable(new oj.ArrayTableDataSource(self.Timezones, {idAttribute: "id"}));
 
       function getTimezonesReqListener () {
         APIUtility.authRedirectIfNotLoggedIn(this.responseText);
-        self.Timezones(JSON.parse(this.responseText));
+        self.Timezones = JSON.parse(this.responseText);
+        self.datasource().reset(self.Timezones);
       }
       var xhr = APIUtility.createXHR(getTimezonesReqListener,"Timezones","GET");
 

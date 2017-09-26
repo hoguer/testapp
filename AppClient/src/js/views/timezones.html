@@ -4,7 +4,21 @@
 
           <div class="oj-panel demo-mypanel oj-flex-item" style="width:60%">
             <div id="timezoneList" class="oj-flex-item oj-md-9 oj-sm-12">
+
             <h3>Timezones</h3><hr/>
+            <input id="filter" maxlength="30" placeholder="Type to filter" type="text"
+                   data-bind="event: {keyup: handleKeyUp}, 
+                              textInput: filter, 
+                              ojComponent: {component:'ojInputText'}">
+            <button id="clearButton"
+                   data-bind="click: clearClick,
+                              ojComponent: {
+                              component: 'ojButton', 
+                              label: 'Clear', 
+                              display: 'icons',
+                              chroming: 'half',
+                              icons: {start:'oj-fwk-icon oj-fwk-icon-cross03'}}">
+            </button>
               <table id="table" 
                      data-bind="ojComponent: {component: 'ojTable', 
                                               data: datasource, 
@@ -16,6 +30,8 @@
                                                         {headerText: 'City', 
                                                          field: 'city'},
                                                         {headerText: 'GMT Offset', 
+                                                         field: 'gmt_offset'},
+                                                        {headerText: 'Current Time', 
                                                          field: 'gmt_offset'}],
                                               selectionMode: {row: 'none', column:'none'},
                                               rowTemplate: 'row_tmpl'}">
@@ -110,5 +126,6 @@
         <td><div id="timezoneName" data-bind="text: name, click: function(data, event){$parent.showChangeTimezoneDialog(id,data,event)}"></div></td>
         <td><div id="locId" data-bind="text: city"></div></td>
         <td><div id="mgrId" data-bind="text: gmt_offset"></div></td>
+        <td><div id="mgrId" data-bind="text: $parent.getDateGMTFormatFromGMTOffset(gmt_offset)"></div></td>
     </tr>
 </script>           

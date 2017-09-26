@@ -42,6 +42,7 @@ require(['ojs/ojcore', 'knockout', 'appController', 'ojs/ojknockout',
     $(function() {
 
       function init() {
+        console.log(document.cookie);
         if (!document.cookie.match(/^(.*;)?connect\.sid=\s*[^;]+(.*)?$/)) {
           window.location = "http://localhost:3000/login";
         }

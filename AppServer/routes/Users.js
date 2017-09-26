@@ -19,7 +19,6 @@ function getRoleName(role_id) {
     case "3":
         return 'manager';
     default:
-    console.log(role_id);
         return 'user';
 	}
 }
@@ -31,7 +30,6 @@ router.get('/getCurrentUser', isAuthenticated, function(req,res,next){
 
 //CREATE
 router.post('/', isAuthenticated, function(req,res,next){
-	console.log("in add user");
 	User.addUser(req.body,function(err,result){
 		if(err) {
 			res.json(err);

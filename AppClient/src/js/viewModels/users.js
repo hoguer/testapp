@@ -100,7 +100,6 @@ define(['ojs/ojcore',
 
       function addUserReqListener () {
         APIUtility.authRedirectIfNotLoggedIn(this.responseText);
-        console.log(this.responseText);
         self.Users.push(JSON.parse(this.responseText));
       }
 
